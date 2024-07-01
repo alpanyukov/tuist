@@ -460,13 +460,7 @@ final class PackageInfoMapperTests: TuistUnitTestCase {
                     .test(
                         "Target1",
                         basePath: basePath,
-                        deploymentTargets: .multiplatform(
-                            iOS: "9.0",
-                            macOS: "10.10",
-                            watchOS: "2.0",
-                            tvOS: "9.0",
-                            visionOS: "1.0"
-                        )
+                        deploymentTargets: .iOS("9.0")
                     ),
                 ]
             )
@@ -505,15 +499,7 @@ final class PackageInfoMapperTests: TuistUnitTestCase {
                 targets: [
                     .test(
                         "Target1",
-                        basePath: basePath,
-                        destinations: Set(Destination.allCases),
-                        deploymentTargets: .multiplatform(
-                            iOS: "12.0",
-                            macOS: "10.13",
-                            watchOS: "4.0",
-                            tvOS: "12.0",
-                            visionOS: "1.0"
-                        )
+                        basePath: basePath
                     ),
                 ]
             )
@@ -1669,13 +1655,7 @@ final class PackageInfoMapperTests: TuistUnitTestCase {
                 .test(
                     "Target1",
                     basePath: basePath,
-                    deploymentTargets: .multiplatform(
-                        iOS: "13.0",
-                        macOS: "10.13",
-                        watchOS: "4.0",
-                        tvOS: "12.0",
-                        visionOS: "1.0"
-                    )
+                    deploymentTargets: .iOS("13.0")
                 ),
             ]
         )
@@ -3427,15 +3407,13 @@ final class PackageInfoMapperTests: TuistUnitTestCase {
                     .test(
                         "Target",
                         basePath: basePath,
-                        destinations: [.iPhone, .iPad],
-                        deploymentTargets: .iOS("12.0")
+                        destinations: [.iPhone, .iPad]
                     ),
                     .test(
                         "TargetTests",
                         basePath: basePath,
                         destinations: [.iPhone, .iPad],
                         product: .unitTests,
-                        deploymentTargets: .iOS("12.0"),
                         customSources: .custom(.sourceFilesList(globs: [
                             "\(testsPath.pathString)/**",
                         ])),
@@ -3527,7 +3505,12 @@ final class PackageInfoMapperTests: TuistUnitTestCase {
                         destinations: [.mac],
                         deploymentTargets: .macOS("10.13")
                     ),
-                    .test("CommonTarget", basePath: basePath),
+                    .test(
+                        "CommonTarget",
+                        basePath: basePath,
+                        destinations: .iOS.union([.appleVisionWithiPadDesign]).union(Destinations.macOS),
+                        deploymentTargets: .multiplatform(iOS: "12.0", macOS: "10.13")
+                    ),
                     .test(
                         "ProductTests",
                         basePath: basePath,
@@ -3764,17 +3747,11 @@ extension ProjectDescription.Target {
         _ name: String,
         packageName: String = "Package",
         basePath: AbsolutePath = "/",
-        destinations: ProjectDescription.Destinations = Set(Destination.allCases),
+        destinations: ProjectDescription.Destinations = .iOS.union([.appleVisionWithiPadDesign]),
         product: ProjectDescription.Product = .staticFramework,
         customProductName: String? = nil,
         customBundleID: String? = nil,
-        deploymentTargets: ProjectDescription.DeploymentTargets = .multiplatform(
-            iOS: "12.0",
-            macOS: "10.13",
-            watchOS: "4.0",
-            tvOS: "12.0",
-            visionOS: "1.0"
-        ),
+        deploymentTargets: ProjectDescription.DeploymentTargets = .iOS("12.0"),
         customSources: SourceFilesListType = .default,
         resources: [ProjectDescription.ResourceFileElement] = [],
         headers: ProjectDescription.Headers? = nil,
