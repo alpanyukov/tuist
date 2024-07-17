@@ -61,6 +61,12 @@ final class PackageSettingsLoaderTests: TuistUnitTestCase {
             TSCUtility.Version("5.4.9")
         }
 
+        manifestLoader.loadPackageSettingsStub = { _ in
+            PackageSettings(
+                platforms: [.iOS, .macOS]
+            )
+        }
+
         // When
         let got = try subject.loadPackageSettings(at: temporaryPath, with: plugins)
 
@@ -78,7 +84,8 @@ final class PackageSettingsLoaderTests: TuistUnitTestCase {
                 defaultSettings: .recommended
             ),
             targetSettings: [:],
-            swiftToolsVersion: Version(stringLiteral: "5.4.9")
+            swiftToolsVersion: Version(stringLiteral: "5.4.9"),
+            platforms: [.iOS, .macOS]
         )
         verify(manifestLoader)
             .register(plugins: .any)

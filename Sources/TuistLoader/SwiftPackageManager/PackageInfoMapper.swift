@@ -335,6 +335,8 @@ public final class PackageInfoMapper: PackageInfoMapping {
             }
         }
 
+        let packageDestinations = packageSettings.destinations.intersection(Set(XcodeGraph.Destination.allCases))
+
         let targets: [ProjectDescription.Target] = try packageInfo.targets
             .compactMap { target -> ProjectDescription.Target? in
                 return try map(
@@ -345,6 +347,7 @@ public final class PackageInfoMapper: PackageInfoMapping {
                     path: path,
                     packageFolder: path,
                     productTypes: productTypes,
+                    packageDestinations: packageDestinations,
                     productDestinations: packageSettings.productDestinations,
                     baseSettings: baseSettings,
                     targetSettings: targetSettings
@@ -398,6 +401,7 @@ public final class PackageInfoMapper: PackageInfoMapping {
         path: AbsolutePath,
         packageFolder: AbsolutePath,
         productTypes: [String: XcodeGraph.Product],
+        packageDestinations: XcodeGraph.Destinations,
         productDestinations: [String: XcodeGraph.Destinations],
         baseSettings: XcodeGraph.Settings,
         targetSettings: [String: XcodeGraph.SettingsDictionary]
@@ -470,7 +474,7 @@ public final class PackageInfoMapper: PackageInfoMapping {
             var testDestinations = Set(XcodeGraph.Destination.allCases)
             for dependencyTarget in target.dependencies {
                 if let dependencyProducts = targetToProducts[dependencyTarget.name] {
-                    let dependencyDestinations = unionDestinationsOfProducts(dependencyProducts, in: productDestinations)
+                    let dependencyDestinations = unionDestinationsOfProducts(dependencyProducts, in: productDestinations, packageDestinations: packageDestinations)
                     testDestinations.formIntersection(dependencyDestinations)
                 }
             }
@@ -478,10 +482,10 @@ public final class PackageInfoMapper: PackageInfoMapping {
         default:
             switch packageType {
             case .local:
-                let productDestinations = unionDestinationsOfProducts(products, in: productDestinations)
+                let productDestinations = unionDestinationsOfProducts(products, in: productDestinations, packageDestinations: packageDestinations)
                 destinations = ProjectDescription.Destinations.from(destinations: productDestinations)
             case .external:
-                destinations = Set(Destination.allCases)
+                destinations = ProjectDescription.Destinations.from(destinations: packageDestinations)
             }
         }
 
@@ -605,14 +609,15 @@ public final class PackageInfoMapper: PackageInfoMapping {
     /// Returns a union of products' destinations.
     private func unionDestinationsOfProducts(
         _ products: Set<PackageInfo.Product>,
-        in productToDestinations: [String: XcodeGraph.Destinations]
+        in productToDestinations: [String: XcodeGraph.Destinations],
+        packageDestinations: XcodeGraph.Destinations
     ) -> XcodeGraph.Destinations {
         Set(
             products.flatMap { product in
                 if product.type == .executable {
                     return Set([XcodeGraph.Destination.mac])
                 }
-                return productToDestinations[product.name] ?? Set(Destination.allCases)
+                return productToDestinations[product.name] ?? packageDestinations
             }
         )
     }

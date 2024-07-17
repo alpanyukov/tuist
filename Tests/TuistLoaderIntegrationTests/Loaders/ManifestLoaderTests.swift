@@ -159,7 +159,7 @@ final class ManifestLoaderTests: TuistTestCase {
         import ProjectDescription
 
         let packageSettings = PackageSettings(
-            targetSettings: ["TargetA": ["OTHER_LDFLAGS": "-ObjC"]]
+            platforms: [.iOS, .watchOS]
         )
 
         #endif
@@ -189,13 +189,7 @@ final class ManifestLoaderTests: TuistTestCase {
         // Then
         XCTAssertEqual(
             got,
-            .init(
-                targetSettings: [
-                    "TargetA": [
-                        "OTHER_LDFLAGS": "-ObjC",
-                    ],
-                ]
-            )
+            .init(platforms: [.iOS, .watchOS])
         )
     }
 

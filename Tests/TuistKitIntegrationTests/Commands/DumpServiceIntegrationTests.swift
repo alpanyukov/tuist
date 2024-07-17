@@ -259,7 +259,7 @@ final class DumpServiceTests: TuistTestCase {
         import ProjectDescription
 
         let packageSettings = PackageSettings(
-            targetSettings: ["TargetA": ["OTHER_LDFLAGS": "-ObjC"]]
+            platforms: [.iOS, .watchOS]
         )
 
         #endif

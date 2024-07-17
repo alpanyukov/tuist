@@ -21,6 +21,7 @@ extension TuistCore.PackageSettings {
         let projectOptions: [String: XcodeGraph.Project.Options] = manifest
             .projectOptions
             .mapValues { .from(manifest: $0) }
+        let platforms = try Set(manifest.platforms.map { try XcodeGraph.PackagePlatform.from(manifest: $0) })
 
         return .init(
             productTypes: productTypes,
@@ -28,7 +29,8 @@ extension TuistCore.PackageSettings {
             baseSettings: baseSettings,
             targetSettings: targetSettings,
             projectOptions: projectOptions,
-            swiftToolsVersion: .init(stringLiteral: swiftToolsVersion.description)
+            swiftToolsVersion: .init(stringLiteral: swiftToolsVersion.description),
+            platforms: platforms
         )
     }
 }

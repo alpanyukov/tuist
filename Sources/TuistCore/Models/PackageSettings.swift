@@ -21,6 +21,8 @@ public struct PackageSettings: Equatable, Codable {
     /// Swift tools version of the parsed `Package.swift`
     public let swiftToolsVersion: Version
 
+    public let platforms: Set<XcodeGraph.PackagePlatform>
+
     /// Initializes a new `PackageSettings` instance.
     /// - Parameters:
     ///    - productTypes: The custom `Product` types to be used for SPM targets.
@@ -33,7 +35,8 @@ public struct PackageSettings: Equatable, Codable {
         baseSettings: Settings,
         targetSettings: [String: SettingsDictionary],
         projectOptions: [String: XcodeGraph.Project.Options] = [:],
-        swiftToolsVersion: Version
+        swiftToolsVersion: Version,
+        platforms: Set<XcodeGraph.PackagePlatform>
     ) {
         self.productTypes = productTypes
         self.productDestinations = productDestinations
@@ -41,6 +44,28 @@ public struct PackageSettings: Equatable, Codable {
         self.targetSettings = targetSettings
         self.projectOptions = projectOptions
         self.swiftToolsVersion = swiftToolsVersion
+        self.platforms = platforms
+    }
+}
+
+extension PackageSettings {
+    public var destinations: XcodeGraph.Destinations {
+        Set(platforms.flatMap { platform -> XcodeGraph.Destinations in
+            switch platform {
+            case .iOS:
+                [.iPhone, .iPad, .appleVisionWithiPadDesign, .macWithiPadDesign]
+            case .macOS:
+                [.mac]
+            case .tvOS:
+                [.appleTv]
+            case .watchOS:
+                [.appleWatch]
+            case .visionOS:
+                [.appleVision]
+            case .macCatalyst:
+                [.macCatalyst]
+            }
+        })
     }
 }
 
@@ -52,7 +77,8 @@ public struct PackageSettings: Equatable, Codable {
             baseSettings: Settings = Settings.default,
             targetSettings: [String: SettingsDictionary] = [:],
             projectOptions: [String: XcodeGraph.Project.Options] = [:],
-            swiftToolsVersion: Version = Version("5.4.9")
+            swiftToolsVersion: Version = Version("5.4.9"),
+            platforms: Set<XcodeGraph.PackagePlatform> = [.iOS]
         ) -> PackageSettings {
             PackageSettings(
                 productTypes: productTypes,
@@ -60,7 +86,8 @@ public struct PackageSettings: Equatable, Codable {
                 baseSettings: baseSettings,
                 targetSettings: targetSettings,
                 projectOptions: projectOptions,
-                swiftToolsVersion: swiftToolsVersion
+                swiftToolsVersion: swiftToolsVersion,
+                platforms: platforms
             )
         }
     }
